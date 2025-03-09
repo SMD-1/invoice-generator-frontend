@@ -1,14 +1,79 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { Label } from "../../components/ui/Label";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 const SignupForm = () => {
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    console.log("Form submitted");
+  const [formData, setFormData] = useState({
+    firstname: "",
+    lastname: "",
+    username: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.id]: e.target.value });
   };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+
+    if (formData.password !== formData.confirmPassword) {
+      toast.warning("Passwords do not match");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        "http://127.0.0.1:3000/user-management/v1/create/user",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            first_name: formData.firstname,
+            last_name: formData.lastname,
+            username: formData.username,
+            email: formData.email,
+            password: formData.password,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        toast.error(data.message || "Something went wrong");
+        setLoading(false);
+        return;
+      }
+
+      toast.success("User created successfully!");
+      setFormData({
+        firstname: "",
+        lastname: "",
+        username: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+      });
+      router.push("/");
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="dark">
       <div className="flex h-screen justify-center items-center dark:bg-gray-950/[0.96] antialiased dark:bg-grid-white/[0.02] dark:overflow-hidden">
@@ -29,6 +94,8 @@ const SignupForm = () => {
                   id="firstname"
                   placeholder="Tyler"
                   type="text"
+                  value={formData.firstname}
+                  onChange={handleChange}
                 />
               </LabelInputContainer>
               <LabelInputContainer>
@@ -38,9 +105,22 @@ const SignupForm = () => {
                   id="lastname"
                   placeholder="Durden"
                   type="text"
+                  value={formData.lastname}
+                  onChange={handleChange}
                 />
               </LabelInputContainer>
             </div>
+            <LabelInputContainer className="mb-4">
+              <Label htmlFor="username">Username</Label>
+              <Input
+                className="dark:text-amber-50"
+                id="username"
+                placeholder="itsdan"
+                type="text"
+                value={formData.username}
+                onChange={handleChange}
+              />
+            </LabelInputContainer>
             <LabelInputContainer className="mb-4">
               <Label htmlFor="email">Email Address</Label>
               <Input
@@ -48,6 +128,8 @@ const SignupForm = () => {
                 id="email"
                 placeholder="projectmayhem@fc.com"
                 type="email"
+                value={formData.email}
+                onChange={handleChange}
               />
             </LabelInputContainer>
             <LabelInputContainer className="mb-4">
@@ -57,23 +139,34 @@ const SignupForm = () => {
                 id="password"
                 placeholder="••••••••"
                 type="password"
+                value={formData.password}
+                onChange={handleChange}
               />
             </LabelInputContainer>
             <LabelInputContainer className="mb-8">
-              <Label htmlFor="confirm-password">Re-enter Password</Label>
+              <Label htmlFor="confirmPassword">Re-enter Password</Label>
               <Input
                 className="dark:text-amber-50"
-                id="confirm-password"
+                id="confirmPassword"
                 placeholder="••••••••"
-                type="confirm-password"
+                type="password"
+                value={formData.confirmPassword}
+                onChange={handleChange}
               />
             </LabelInputContainer>
 
             <button
               className="cursor-pointer bg-gradient-to-br relative group/btn from-black dark:from-gray-900 dark:to-gray-950 to-neutral-600 block dark:bg-zinc-800 w-full text-white rounded-md h-10 font-medium shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] dark:shadow-[0px_1px_0px_0px_var(--zinc-800)_inset,0px_-1px_0px_0px_var(--zinc-800)_inset]"
               type="submit"
+              disabled={loading}
             >
-              Sign up &rarr;
+              {loading ? (
+                `Signing up...`
+              ) : (
+                <>
+                  Sign up <span>&rarr;</span>
+                </>
+              )}
               <BottomGradient />
             </button>
 

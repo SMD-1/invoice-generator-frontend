@@ -15,7 +15,6 @@ const Login = () => {
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("Clicked", { email, password });
     try {
       const response = await fetch(
         "http://127.0.0.1:3000/user-management/v1/login/user",
@@ -25,16 +24,17 @@ const Login = () => {
           body: JSON.stringify({ email: email, password: password }),
         }
       );
-      console.log("response: ", response);
       const data = await response.json();
-      console.log("data: ", data);
       if (!data.success) {
         toast.error(data.message);
         return;
       }
 
       localStorage.setItem("token", data.token); // Store token (can use cookies instead)
-      router.push("/"); // Redirect after login
+      toast.success("Logged in successfully!");
+      setEmail("");
+      setPassword("");
+      router.push("/");
     } catch (err: any) {
       toast.error(err.message);
     }

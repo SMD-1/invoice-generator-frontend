@@ -39,7 +39,7 @@ export const Header = () => {
     toast.success("Logged out successfully!");
   };
 
-  const [isOpen, setOpen] = useState(false);
+  // const [isOpen, setOpen] = useState(false);
   return (
     <header className="w-full z-40 fixed top-0 left-0 bg-background border-b shadow-sm">
       <div className="mx-auto relative min-h-14 flex gap-4 flex-row items-center">
@@ -49,13 +49,11 @@ export const Header = () => {
               {navigationItems.map((item) => (
                 <NavigationMenuItem key={item.title}>
                   {item.href && (
-                    <>
-                      <NavigationMenuLink href={item.href}>
-                        <Button variant="ghost" className="cursor-pointer">
-                          {item.title}
-                        </Button>
-                      </NavigationMenuLink>
-                    </>
+                    <NavigationMenuLink href={item.href}>
+                      <Button variant="ghost" className="cursor-pointer">
+                        {item.title}
+                      </Button>
+                    </NavigationMenuLink>
                   )}
                 </NavigationMenuItem>
               ))}
@@ -82,7 +80,7 @@ export const Header = () => {
                   Settings
                 </MenubarTrigger>
                 <MenubarContent align="end">
-                  <MenubarItem>
+                  <MenubarItem onClick={() => router.push("/login/code")}>
                     Generate QR code
                     <MenubarShortcut>
                       <QrCode />
